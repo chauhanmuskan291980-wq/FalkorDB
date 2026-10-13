@@ -9,7 +9,7 @@ load_dotenv()
 
 FALKORDB_HOST = os.getenv("FALKORDB_HOST", "localhost")
 FALKORDB_PORT = int(os.getenv("FALKORDB_PORT", "6379"))
-GRAPH_NAME = os.getenv("FALKORDB_GRAPH", "learning_graph")
+GRAPH_NAME = os.getenv("FALKORDB_GRAPH", "traceguard_graph")
 
 
 @lru_cache(maxsize=1)

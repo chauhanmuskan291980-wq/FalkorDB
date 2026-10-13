@@ -1,5 +1,6 @@
 
 import os
+from functools import lru_cache
 
 from dotenv import load_dotenv
 from falkordb import FalkorDB
@@ -11,10 +12,15 @@ FALKORDB_PORT = int(os.getenv("FALKORDB_PORT", "6379"))
 GRAPH_NAME = os.getenv("FALKORDB_GRAPH", "learning_graph")
 
 
-def get_graph():
-    """Connect to FalkorDB and return the selected graph."""
-    db = FalkorDB(
+@lru_cache(maxsize=1)
+def get_db() -> FalkorDB:
+    """Create and reuse the FalkorDB client."""
+    return FalkorDB(
         host=FALKORDB_HOST,
         port=FALKORDB_PORT,
     )
-    return db.select_graph(GRAPH_NAME)
+
+
+def get_graph():
+    """Return the configured FalkorDB graph."""
+    return get_db().select_graph(GRAPH_NAME)

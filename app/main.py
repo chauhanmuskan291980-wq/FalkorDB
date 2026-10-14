@@ -1,21 +1,17 @@
 
 from fastapi import FastAPI
-
-from app.api.health import router as health_router
+from app.api.investigations import router as investigations_router
 
 app = FastAPI(
     title="TraceGuard AI",
-    description="Evidence-based AI fraud investigation platform.",
+    description="Evidence-backed fraud investigation using FalkorDB.",
     version="0.1.0",
 )
 
-app.include_router(health_router)
 
+@app.get("/health")
+def health_check() -> dict[str, str]:
+    """Confirm that the API process is running."""
+    return {"status": "healthy", "service": "traceguard-api"}
 
-@app.get("/", tags=["Root"])
-def root() -> dict:
-    """Return basic application information."""
-    return {
-        "name": "TraceGuard AI",
-        "message": "Fraud investigation API is running.",
-    }
+app.include_router(investigations_router)

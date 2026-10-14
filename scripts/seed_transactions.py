@@ -3,7 +3,7 @@ from app.db.connection import get_graph
 
 
 def seed_transactions() -> None:
-    """Seed fictional transactions for fraud-investigation practice."""
+    """Seed synthetic transactions without duplicate relationships."""
     graph = get_graph()
 
     transactions = [
@@ -30,21 +30,15 @@ def seed_transactions() -> None:
     for transaction in transactions:
         graph.query(
             """
-            MATCH (a:Account {account_id: $account_id})
+            MERGE (a:Account {account_id: $account_id})
             MERGE (t:Transaction {
                 transaction_id: $transaction_id
             })
-            SET
-                t.amount = $amount,
+            SET t.amount = $amount,
                 t.status = $status
             MERGE (a)-[:MADE]->(t)
             """,
-            {
-                "account_id": transaction["account_id"],
-                "transaction_id": transaction["transaction_id"],
-                "amount": transaction["amount"],
-                "status": transaction["status"],
-            },
+            transaction,
         )
 
     print("Synthetic transactions seeded successfully.")

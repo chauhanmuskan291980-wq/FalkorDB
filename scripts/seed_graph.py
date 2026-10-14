@@ -3,54 +3,57 @@ from app.db.connection import get_graph
 
 
 def seed_graph() -> None:
-    """Create a small synthetic fraud-investigation graph."""
+    """Create the synthetic TraceGuard fraud-investigation graph."""
     graph = get_graph()
 
-    # Create two fictional customers.
+    # Create customers only if they do not already exist.
     graph.query("""
-        CREATE
-            (:Customer {customer_id: 'CUS-001', name: 'Asha'}),
-            (:Customer {customer_id: 'CUS-002', name: 'Riya'})
+        MERGE (:Customer {customer_id: 'CUS-001'})
+    """)
+    graph.query("""
+        MERGE (:Customer {customer_id: 'CUS-002'})
     """)
 
-    # Create their accounts.
+    # Create accounts only if they do not already exist.
     graph.query("""
-        CREATE
-            (:Account {account_id: 'ACC-001'}),
-            (:Account {account_id: 'ACC-002'})
+        MERGE (:Account {account_id: 'ACC-001'})
+    """)
+    graph.query("""
+        MERGE (:Account {account_id: 'ACC-002'})
     """)
 
-    # Link each customer to an account.
+    # Create one device.
+    graph.query("""
+        MERGE (:Device {device_id: 'DEV-001'})
+    """)
+
+    # Connect customers to accounts.
     graph.query("""
         MATCH (c:Customer {customer_id: 'CUS-001'}),
               (a:Account {account_id: 'ACC-001'})
-        CREATE (c)-[:OWNS]->(a)
+        MERGE (c)-[:OWNS]->(a)
     """)
 
     graph.query("""
         MATCH (c:Customer {customer_id: 'CUS-002'}),
               (a:Account {account_id: 'ACC-002'})
-        CREATE (c)-[:OWNS]->(a)
+        MERGE (c)-[:OWNS]->(a)
     """)
 
-    # Create a shared device associated with both accounts.
-    graph.query("""
-        CREATE (:Device {device_id: 'DEV-001'})
-    """)
-
+    # Connect both accounts to the shared device.
     graph.query("""
         MATCH (a:Account {account_id: 'ACC-001'}),
               (d:Device {device_id: 'DEV-001'})
-        CREATE (a)-[:USED_DEVICE]->(d)
+        MERGE (a)-[:USED_DEVICE]->(d)
     """)
 
     graph.query("""
         MATCH (a:Account {account_id: 'ACC-002'}),
               (d:Device {device_id: 'DEV-001'})
-        CREATE (a)-[:USED_DEVICE]->(d)
+        MERGE (a)-[:USED_DEVICE]->(d)
     """)
 
-    print("Synthetic graph created successfully.")
+    print("Synthetic graph seeded successfully.")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from fastapi import APIRouter
 
 from app.tools.flagged_transactions import find_flagged_transactions
 from app.tools.shared_devices import find_shared_devices
+from app.core.report_generator import generate_investigation_report
 
 router = APIRouter(
     prefix="/investigations",
@@ -10,14 +11,15 @@ router = APIRouter(
 )
 
 
+
 @router.get("/{account_id}")
 def investigate_account(account_id: str) -> dict:
-    """Collect graph evidence for a specific account."""
+    """Collect graph evidence and generate an investigation report."""
 
     flagged_transactions = find_flagged_transactions(account_id)
     shared_devices = find_shared_devices(account_id)
 
-    return {
+    investigation = {
         "account_id": account_id,
         "evidence": {
             "flagged_transactions": flagged_transactions,
@@ -28,3 +30,11 @@ def investigate_account(account_id: str) -> dict:
             "shared_device_connection_count": len(shared_devices),
         },
     }
+
+    report = generate_investigation_report(investigation)
+
+    return {
+        **investigation,
+        "report": report,
+    }
+
